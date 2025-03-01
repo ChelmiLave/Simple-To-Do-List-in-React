@@ -1,33 +1,60 @@
-const notes = [
-  {
-    key: 1,
-    title: "Delegation",
-    content:
-      "Q. How many programmers does it take to change a light bulb? A. None – It’s a hardware problem",
-  },
-  {
-    key: 2,
-    title: "Loops",
-    content:
-      "How to keep a programmer in the shower forever. Show him the shampoo bottle instructions: Lather. Rinse. Repeat.",
-  },
-  {
-    key: 3,
-    title: "Arrays",
-    content:
-      "Q. Why did the programmer quit his job? A. Because he didn't get arrays.",
-  },
-  {
-    key: 4,
-    title: "Hardware vs. Software",
-    content:
-      "What's the difference between hardware and software? You can hit your hardware with a hammer, but you can only curse at your software.",
-  },
-  {
-    key: 5,
-    title: "Big ideas",
-    content: "Eat more sushi",
-  },
-];
+import React, { useState, useEffect } from "react";
+import Header from "./Header";
+import Footer from "./Footer";
+import Note from "./Note";
+import CreateArea from "./CreateArea";
+import notes from "../notes"; // Import the pre-defined notes from notes.js
 
-export default notes;
+function App() {
+  const [notesState, setNotes] = useState([]);
+
+  // Load notes from localStorage or initialize with pre-defined notes
+  useEffect(() => {
+    const storedNotes = JSON.parse(localStorage.getItem("notes"));
+    if (storedNotes) {
+      setNotes(storedNotes); // Load from localStorage if available
+    } else {
+      setNotes(notes); // Set pre-defined notes if localStorage is empty
+      localStorage.setItem("notes", JSON.stringify(notes)); // Save pre-defined notes to localStorage
+    }
+  }, []);
+
+  // Add a new note and update localStorage
+  function addNote(newNote) {
+    setNotes((prevNotes) => {
+      const updatedNotes = [...prevNotes, newNote];
+      localStorage.setItem("notes", JSON.stringify(updatedNotes)); // Save to localStorage
+      return updatedNotes;
+    });
+  }
+
+  // Delete a note and update localStorage
+  function deleteNote(id) {
+    setNotes((prevNotes) => {
+      const updatedNotes = prevNotes.filter((noteItem, index) => index !== id);
+      localStorage.setItem("notes", JSON.stringify(updatedNotes)); // Update localStorage
+      return updatedNotes;
+    });
+  }
+
+  return (
+    <div>
+      <Header />
+      <CreateArea onAdd={addNote} />
+      {notesState.map((noteItem, index) => {
+        return (
+          <Note
+            key={index}
+            id={index}
+            title={noteItem.title}
+            content={noteItem.content}
+            onDelete={deleteNote}
+          />
+        );
+      })}
+      <Footer />
+    </div>
+  );
+}
+
+export default App;
